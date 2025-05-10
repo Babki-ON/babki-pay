@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Babki Compute - dApp</title>
+</head>
+<body style="background-color: #0f0f1a; color: white; font-family: monospace; text-align: center; padding-top: 50px;">
+  <h1>Babki Compute (Babki_ON)</h1>
+  <p>Децентрализованные вычисления. Социальный эксперимент.</p>
+
+  <button onclick="connectWallet()" style="padding: 10px 20px;">🔗 Подключить кошелёк</button>
+  <p id="walletAddress" style="margin-top: 20px;"></p>
+
+  <h3>Загрузить задачу:</h3>
+  <textarea id="taskInput" rows="4" cols="50" placeholder="Например: рассчитать SHA256 от числа 2025"></textarea><br><br>
+  <button onclick="submitTask()" style="padding: 10px 20px;">📤 Отправить задачу</button><br><br>
+
+  <button onclick="payTask()" style="padding: 10px 20px; background-color: green; color: white;">💰 Оплатить задачу (100 BABK)</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+  <script>
+    let userAccount = "";
+    const tokenAddress = "0x8045fbde04416af5bf677d7a9acbf5453eec5c59";
+    const recipient = "0x6c1e0a4B4Ba479C01fcd97e9df46b016A7E10169";
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        window.web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.getAccounts();
+        userAccount = accounts[0];
+        document.getElementById("walletAddress").innerText = "Кошелёк: " + userAccount;
+      } else {
+        alert("Установи MetaMask!");
+      }
+    }
+
+    function submitTask() {
+      const task = document.getElementById("taskInput").value;
+      if (!task) return alert("Пустое поле задачи!");
+      console.log("Задача от", userAccount, ":", task);
+      alert("Задача отправлена (в консоль). Следующий шаг — интеграция с беком.");
+    }
+
+    async function payTask() {
+      if (!window.ethereum || !userAccount) return alert("Сначала подключи кошелёк");
+
+      const minABI = [
+        {
+          "constant": false,
+          "inputs": [
+            { "name": "_to", "type": "address" },
+            { "name": "_value", "type": "uint256" }
+          ],
+          "name": "transfer",
+          "outputs": [{ "name": "", "type": "bool" }],
+          "type": "function"
+        }
+      ];
+
+      const contract = new web3.eth.Contract(minABI, tokenAddress);
+
+      try {
+        const amount = web3.utils.toWei("100", "ether");
+        const tx = await contract.methods.transfer(recipient, amount).send({ from: userAccount });
+        alert("Оплата прошла! Хэш: " + tx.transactionHash);
+      } catch (e) {
+        console.error(e);
+        alert("Ошибка при оплате задачи");
+      }
+    }
+  </script>
+</body>
+</html>
