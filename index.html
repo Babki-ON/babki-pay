@@ -37,10 +37,32 @@
     }
 
     function submitTask() {
-      const task = document.getElementById("taskInput").value;
-      if (!task) return alert("Пустое поле задачи!");
-      console.log("Задача от", userAccount, ":", task);
-      alert("Задача отправлена (в консоль).");
+      function submitTask() {
+  const task = document.getElementById("taskInput").value;
+  if (!task) return alert("Пустое поле задачи!");
+
+  fetch("http://178.161.159.196:5000/task", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-KEY": "KeyBabki456"  // Тот же ключ
+    },
+    body: JSON.stringify({
+      task: task,
+      sender: userAccount || "unknown"
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log(data);
+    alert("Задача отправлена в обработку!");
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Ошибка при отправке задачи");
+  });
+}
+
     }
 
     async function payTask() {
